@@ -6,8 +6,12 @@ pl.ion()
 datadir='./data/'
 
 
+def make_baseline():
+    main(savename='bb.png')
+
+
 def main(lpower=1.5, include_polarbear=True, force_crop=True, 
-         filetype='png', savepath='./'):
+         filetype='png', savepath='./', savename=None):
 
     # load theory
     l, cl_bb_lens, cl_bb_r = load_theory(r=0.2)
@@ -59,9 +63,10 @@ def main(lpower=1.5, include_polarbear=True, force_crop=True,
 
 
     # Save the figure.
-    savename = savepath+'bb_l%0.1f_bicep2_sptpol'%lpower
-    if include_polarbear: savename += '_pbear'
-    savename += '.'+filetype
+    if savename==None:
+        savename = savepath+'bb_l%0.1f_bicep2_sptpol'%lpower
+        if include_polarbear: savename += '_pbear'
+        savename += '.'+filetype
     print 'making '+savename
     pl.savefig(savename, dpi=300)
 
