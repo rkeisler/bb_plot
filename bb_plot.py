@@ -7,11 +7,24 @@ datadir='./data/'
 
 
 def make_baseline():
+    '''
+    Run the main() function with the baseline parameters, and 
+    save the output image as bb.png.
+    '''
     main(savename='bb.png')
 
 
 def main(lpower=1.5, include_polarbear=True, force_crop=True, 
          filetype='png', savepath='./', savename=None):
+    '''
+    The main program for making this figure.
+    LPOWER [1.5] controls the power of the multipole scaling.
+    INCLUDE_POLARBEAR [True] determines whether to include the POLARBEAR data.
+    FORCE_CROP [True] determines whether to use the "BICEP2+SPTpol" vertical range.
+    FILETYPE ['png'] is the type of image produced.
+    SAVEPATH ['./'] is the save path.
+    SAVENAME [None] is available if you want to force a particular filename.
+    '''
 
     # load theory
     l, cl_bb_lens, cl_bb_r = load_theory(r=0.2)
