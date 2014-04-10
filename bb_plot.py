@@ -121,7 +121,7 @@ def load_data(exp, lpower):
         legend_name = 'SPTpol (lensing)'
         name = 'sptpol'
         color = 'blue'
-        symbol = 'v'
+        symbol = '^'
         
     if exp=='bicep2':
         # Load BICEP2 bandpowers.
