@@ -1,9 +1,13 @@
 import numpy as np
 import matplotlib.pylab as pl
+from matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica'], 'size':13})
 pl.ion()
 datadir='./data/'
 
-def main(lpower=1.5, include_polarbear=True, force_crop=True):
+
+def main(lpower=1.5, include_polarbear=True, force_crop=True, 
+         filetype='png', savepath='./'):
 
     # load theory
     l, cl_bb_lens, cl_bb_r = load_theory(r=0.2)
@@ -13,9 +17,8 @@ def main(lpower=1.5, include_polarbear=True, force_crop=True):
     bi = load_data('bicep2', lpower)
     pb = load_data('polarbear', lpower)
     
-    # plot
+    # Set up a few things for plotting.
     lscal = lscaling(l, lpower)
-    
     fs = 18
     lw_theory = 2
     lw_data = 2
@@ -38,7 +41,7 @@ def main(lpower=1.5, include_polarbear=True, force_crop=True):
         if (force_crop) & (e['name']=='polarbear'):
             pl.ylim(ax.get_ylim())
         pl.errorbar(e['l'], e['plot'], yerr=e['dplot'], fmt=' ', 
-                    linewidth=lw_data, color=e['color'])
+                    linewidth=lw_data, color=e['color'], capsize=3)
         pl.plot(e['l'], e['plot'], e['symbol'], color=e['color'], ms=9)
         if e['name']=='sptpol': 
             pl.plot(e['l'], e['plot']+e['dplot'], e['symbol'], color=e['color'], ms=7)
@@ -56,19 +59,22 @@ def main(lpower=1.5, include_polarbear=True, force_crop=True):
 
 
     # Save the figure.
-    savename = 'bb_l%0.1f_bicep2_sptpol'%lpower
+    savename = savepath+'bb_l%0.1f_bicep2_sptpol'%lpower
     if include_polarbear: savename += '_pbear'
-    savename += '.png'
-    print savename
-    pl.savefig(savename)
+    savename += '.'+filetype
+    print 'making '+savename
+    pl.savefig(savename, dpi=300)
+
 
 
 def get_ylabel(lpower):
-    if lpower==0: o=r'$C_\ell^{BB} [\mu K^2]$'
-    if lpower==0.5: o=r'$\ell^{0.5} C_\ell^{BB} [\mu K^2]$'
-    if lpower==1: o=r'$\ell C_\ell^{BB} [\mu K^2]$'
-    if lpower==1.5: o=r'$\ell^{0.5} ( \ell + 1)  C_\ell^{BB} [\mu K^2]$'
-    if lpower==2: o=r'$\ell ( \ell + 1) C_\ell^{BB} /(2 \pi) [\mu K^2]$'
+    if lpower==0: o=r'$C_\ell^{BB}$'
+    if lpower==0.5: o=r'$\ell^{0.5} C_\ell^{BB}$'
+    if lpower==1: o=r'$\ell C_\ell^{BB}$'
+    if lpower==1.5: o=r'$\ell^{0.5} ( \ell + 1)  C_\ell^{BB}$'
+    if lpower==2: o=r'$\ell ( \ell + 1) C_\ell^{BB} /(2 \pi)$'
+    o += '  '
+    o += '$[\mu K^2]$'
     return o
 
 
