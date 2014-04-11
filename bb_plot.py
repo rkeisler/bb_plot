@@ -14,6 +14,14 @@ def make_baseline():
     main(savename='bb.png')
 
 
+def make_many():
+    make_baseline()
+    main(force_crop=True,lpower=1.5)
+    main(force_crop=False,lpower=1.5)
+    main(force_crop=True,lpower=2)
+    main(force_crop=False,lpower=2)
+
+
 def main(lpower=1.5, include_polarbear=True, force_crop=True, 
          filetype='png', savepath='./', savename=None):
     '''
@@ -54,15 +62,19 @@ def main(lpower=1.5, include_polarbear=True, force_crop=True,
     exp2plot = [bi, spt]
     if include_polarbear: exp2plot.append(pb)
     ax = pl.gca()
+    ms_scale = 1.
+    if not(force_crop): ms_scale *= 0.5
+    if (lpower==2): ms_scale *= 0.8
     for e in exp2plot:
         if (force_crop) & (e['name']=='polarbear'):
-            pl.ylim(ax.get_ylim())
+            ylim_current = np.array(ax.get_ylim())
+            pl.ylim(1.*ylim_current)
         pl.errorbar(e['l'], e['plot'], yerr=e['dplot'], fmt=' ', 
-                    linewidth=lw_data, color=e['color'], capsize=3)
-        pl.plot(e['l'], e['plot'], e['symbol'], color=e['color'], ms=9)
+                    linewidth=lw_data, color=e['color'], capsize=e['capsize'])
+        pl.plot(e['l'], e['plot'], e['symbol'], color=e['color'], ms=9*ms_scale)
         if e['name']=='sptpol': 
-            pl.plot(e['l'], e['plot']+e['dplot'], e['symbol'], color=e['color'], ms=7)
-            pl.plot(e['l'], e['plot']-e['dplot'], e['symbol'], color=e['color'], ms=7)
+            pl.plot(e['l'], e['plot']+e['dplot'], e['symbol'], color=e['color'], ms=7*ms_scale)
+            pl.plot(e['l'], e['plot']-e['dplot'], e['symbol'], color=e['color'], ms=7*ms_scale)
 
     # Add a legend.
     yl = ax.get_ylim()
@@ -70,7 +82,7 @@ def main(lpower=1.5, include_polarbear=True, force_crop=True,
     fs_legend = 19
     xt = 2.*xl[0]
     yt = 0.85*(yl[1]-yl[0]) + yl[0]
-    dyt = yt/8.
+    dyt = (yl[1]-yl[0])/14.
     for i,e in enumerate(exp2plot):
         pl.text(xt,yt-i*dyt,e['legend_name'], color=e['color'], fontsize=fs_legend)
 
@@ -79,6 +91,7 @@ def main(lpower=1.5, include_polarbear=True, force_crop=True,
     if savename==None:
         savename = savepath+'bb_l%0.1f_bicep2_sptpol'%lpower
         if include_polarbear: savename += '_pbear'
+        if not(force_crop): savename += '_nocrop'
         savename += '.'+filetype
     print 'making '+savename
     pl.savefig(savename, dpi=300)
@@ -122,6 +135,7 @@ def load_data(exp, lpower):
         name = 'sptpol'
         color = 'blue'
         symbol = '^'
+        capsize=0
         
     if exp=='bicep2':
         # Load BICEP2 bandpowers.
@@ -133,7 +147,7 @@ def load_data(exp, lpower):
         name = 'bicep2'
         color = 'darkred'
         symbol = 'o'
-
+        capsize=3
 
     if exp=='polarbear':
         # Load PolarBear bandpowers.
@@ -146,13 +160,14 @@ def load_data(exp, lpower):
         name = 'polarbear'
         color = 'green'
         symbol = 'o'
+        capsize=3
 
     return {'l':l, 'cl':cl_bb, 'dcl':sigma_cl_bb, 
             'name':name, 'legend_name':legend_name, 
             'color':color, 
             'plot':cl_bb*lscaling(l, lpower),
             'dplot':sigma_cl_bb*lscaling(l, lpower), 
-            'symbol':symbol}
+            'symbol':symbol, 'capsize':capsize}
 
 def lscaling(l, lpower=1.):
     if (lpower==0) | (lpower==0.5) | (lpower==1): output = l**(lpower)
