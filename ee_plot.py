@@ -11,7 +11,8 @@ def make_baseline():
     Run the make_one() function with the baseline parameters, and 
     save the output image as ee.png.
     '''
-    make_one(savename='ee.png', lpower=2, include_wmap=True)
+    make_one(savename='ee.pdf', lpower=2, include_wmap=True, 
+             filetype='pdf')
 
 
 
@@ -155,7 +156,7 @@ def load_data(exp, lpower):
         sigma_cl_ee = sigma_dl_ee/l/(l+1.)*2.*np.pi
         legend_name = 'WMAP'
         name = 'wmap'
-        color = 'blue'
+        color = 'Navy'
         symbol = 'o'
         capsize=0
         
@@ -167,7 +168,7 @@ def load_data(exp, lpower):
         sigma_cl_ee = tmp[:,11]/l/(l+1.)*2.*np.pi
         legend_name = 'BICEP2'
         name = 'bicep2'
-        color = 'darkred'
+        color = 'DarkRed'
         symbol = 'o'
         capsize=3
 
@@ -181,7 +182,7 @@ def load_data(exp, lpower):
         sigma_cl_ee = sigma_dl_ee/l/(l+1.)*2.*np.pi
         legend_name = 'QUaD'
         name = 'quad'
-        color = 'green'
+        color = 'DarkOrange'
         symbol = 'o'
         capsize=3
 

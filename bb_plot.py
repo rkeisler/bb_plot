@@ -11,7 +11,8 @@ def make_baseline():
     Run the make_one() function with the baseline parameters, and 
     save the output image as bb.png.
     '''
-    make_one(savename='bb.png', force_crop=True, lpower=2, logy=False)
+    make_one(savename='bb.pdf', force_crop=True, lpower=2, 
+             logy=False, filetype='pdf')
 
 
 
@@ -155,7 +156,7 @@ def load_data(exp, lpower):
         sigma_cl_bb = tmp[:,2]/l/1e4
         legend_name = 'SPTpol (lensing only)'
         name = 'sptpol'
-        color = 'blue'
+        color = 'Navy'
         symbol = '^'
         capsize=0
         
@@ -167,7 +168,7 @@ def load_data(exp, lpower):
         sigma_cl_bb = tmp[:,12]/l/(l+1.)*2.*np.pi
         legend_name = 'BICEP2'
         name = 'bicep2'
-        color = 'darkred'
+        color = 'DarkRed'
         symbol = 'o'
         capsize=3
 
@@ -180,7 +181,7 @@ def load_data(exp, lpower):
         sigma_cl_bb = sigma_dl_bb/l/(l+1.)*2.*np.pi
         legend_name = 'POLARBEAR'
         name = 'polarbear'
-        color = 'green'
+        color = 'DarkOrange'
         symbol = 'o'
         capsize=3
 
