@@ -18,14 +18,19 @@ def make_baseline():
 
 def make_many():
     #make_baseline()
-    make_one(lpower=2, logy=False, logx=False)
-    make_one(lpower=2, logy=False, logx=True)
     #make_one(lpower=2, include_wmap=True)
     #make_one(lpower=2, include_wmap=False)
 
+    make_one(lpower=2, logy=False, logx=False, include_sptpol500d=False)
+    make_one(lpower=2, logy=False, logx=True, include_sptpol500d=False)
+    make_one(lpower=2, logy=False, logx=False, include_sptpol500d=True)
+    make_one(lpower=2, logy=False, logx=True, include_sptpol500d=True)
 
 
-def make_one(lpower=1.5, include_wmap=True, force_crop=True, 
+
+def make_one(lpower=1.5, 
+             include_sptpol500d=False, 
+             include_wmap=True, force_crop=True, 
              logx=True, logy=False, filetype='pdf', 
              savepath='./', savename=None):
     '''
@@ -47,6 +52,7 @@ def make_one(lpower=1.5, include_wmap=True, force_crop=True,
     quad = load_data('quad', lpower)
     actpol = load_data('actpol', lpower)
     sptpol100d = load_data('sptpol100d', lpower)
+    sptpol500d = load_data('sptpol500d', lpower)
 
     # Set up a few things for plotting.
     lscal = lscaling(l, lpower)
@@ -71,8 +77,11 @@ def make_one(lpower=1.5, include_wmap=True, force_crop=True,
 
 
     # Plot the data.
-    exp2plot = [bi, actpol, sptpol100d]
-    if (include_wmap) & (not(wmap in exp2plot)): exp2plot.append(wmap)
+    exp2plot = [bi, actpol]
+    if include_sptpol500d: exp2plot.append(sptpol500d)
+    else: exp2plot.append(sptpol100d)
+    #if include_sptpol500d: exp2plot.append(sptpol500d)
+    if include_wmap: exp2plot.append(wmap)
     ax = pl.gca()
     ms_scale = 1.
     if not(force_crop): ms_scale *= 0.5
@@ -123,7 +132,9 @@ def make_one(lpower=1.5, include_wmap=True, force_crop=True,
 
     # Save the figure.
     if savename==None:
-        savename = savepath+'ee_l%0.1f_bicep2_sptpol_actpol'%lpower
+        savename = savepath+'ee_l%0.1f_bicep2_actpol'%lpower
+        if include_sptpol500d: savename += '_sptpol500d'
+        else: savename += '_sptpol100d'
         if include_wmap: savename += '_wmap'
         if not(force_crop): savename += '_nocrop'
         if logy: savename += '_logy'
@@ -228,6 +239,21 @@ def load_data(exp, lpower):
         symbol = 'o'
         capsize=3
 
+
+    if exp=='sptpol500d':
+        import pickle
+        d = pickle.load(open('data/sptpol_data_2013_plotting.pkl','r'))
+        l = d['ells']
+        dl_ee = d['EE']
+        sigma_dl_ee = d['EE_errors']
+        cl_ee = dl_ee/l/(l+1.)*2.*np.pi
+        sigma_cl_ee = sigma_dl_ee/l/(l+1.)*2.*np.pi
+
+        legend_name = 'SPTpol-500d (prelim.)'
+        name = 'sptpol500d'
+        color = 'blue'
+        symbol = 'o'
+        capsize=3
 
 
     return {'l':l, 'cl':cl_ee, 'dcl':sigma_cl_ee, 
