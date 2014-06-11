@@ -17,23 +17,34 @@ def make_baseline():
 
 
 def make_many():
+    make_one(force_crop=True, logy=False, include_actpol=False, include_polarbear=True)
+    make_one(force_crop=True, logy=False, include_actpol=False, include_polarbear=False)
+    make_one(force_crop=False, logy=False, include_actpol=False, include_polarbear=True)
+    make_one(force_crop=False, logy=False, include_actpol=True, include_polarbear=True)
+
+
+    '''
     make_baseline()
     make_one(force_crop=True,lpower=1.5)
     make_one(force_crop=False,lpower=1.5)
     make_one(force_crop=True,lpower=2)
     make_one(force_crop=False,lpower=2)
     make_one(force_crop=False,lpower=2,logy=True)
+    '''
 
 
-def make_one(lpower=1.5, include_polarbear=True, force_crop=True, 
-             logy=False, filetype='png', 
+def make_one(lpower=2, include_polarbear=True, 
+             include_actpol=False,
+             force_crop=True, 
+             logy=False, filetype='pdf', 
              savepath='./', savename=None):
     '''
     The main program for making this figure.
     LPOWER [1.5] controls the power of the multipole scaling.
     INCLUDE_POLARBEAR [True] determines whether to include the POLARBEAR data.
+    INCLUDE_ACTPOL [True] determines whether to include the ACTPOL data.
     FORCE_CROP [True] determines whether to use the "BICEP2+SPTpol" vertical range.
-    FILETYPE ['png'] is the type of image produced.
+    FILETYPE ['pdf'] is the type of image produced.
     SAVEPATH ['./'] is the save path.
     SAVENAME [None] is available if you want to force a particular filename.
     '''
@@ -45,7 +56,8 @@ def make_one(lpower=1.5, include_polarbear=True, force_crop=True,
     spt = load_data('sptpol', lpower)
     bi = load_data('bicep2', lpower)
     pb = load_data('polarbear', lpower)
-    
+    actpol = load_data('actpol',lpower)
+
     # Set up a few things for plotting.
     lscal = lscaling(l, lpower)
     fs = 18
@@ -66,7 +78,8 @@ def make_one(lpower=1.5, include_polarbear=True, force_crop=True,
 
     # Plot the data.
     exp2plot = [bi, spt]
-    if include_polarbear: exp2plot = [bi, pb, spt]
+    if include_polarbear: exp2plot.append(pb)
+    if include_actpol: exp2plot.append(actpol)
     ax = pl.gca()
     ms_scale = 1.
     if not(force_crop): ms_scale *= 0.5
@@ -113,6 +126,7 @@ def make_one(lpower=1.5, include_polarbear=True, force_crop=True,
     if savename==None:
         savename = savepath+'bb_l%0.1f_bicep2_sptpol'%lpower
         if include_polarbear: savename += '_pbear'
+        if include_actpol: savename += '_actpol'
         if not(force_crop): savename += '_nocrop'
         if logy: savename += '_logy'
         savename += '.'+filetype
@@ -185,6 +199,20 @@ def load_data(exp, lpower):
         symbol = 'o'
         capsize=3
 
+
+    if exp=='actpol':
+        actpol = load_actpol()
+        l = actpol['l']
+        dl_bb = actpol['dl_bb']
+        sigma_dl_bb = actpol['sigma_dl_bb']
+        cl_bb = dl_bb/l/(l+1.)*2.*np.pi
+        sigma_cl_bb = sigma_dl_bb/l/(l+1.)*2.*np.pi
+        legend_name = 'ACTpol'
+        name = 'actpol'
+        color = 'darkgreen'
+        symbol = 'o'
+        capsize=3
+
     return {'l':l, 'cl':cl_bb, 'dcl':sigma_cl_bb, 
             'name':name, 'legend_name':legend_name, 
             'color':color, 
@@ -198,5 +226,27 @@ def lscaling(l, lpower=1.):
     if (lpower==2): output = l*(l+1.)/2./np.pi
     return output
 
+
+def load_actpol():
+    f = open('data/actpol_1405_5524_data.txt','r')
+    d = {'l':[], 'dl_tt':[], 'sigma_dl_tt':[], 
+         'dl_te':[], 'sigma_dl_te':[], 
+         'dl_ee':[], 'sigma_dl_ee':[], 
+         'dl_bb':[], 'sigma_dl_bb':[]}
+    for line in f:
+        tmp = line.split('&')
+        d['l'].append( np.float(tmp[0]) )
+        d['dl_tt'].append( np.float(tmp[2]) )
+        d['sigma_dl_tt'].append( np.float(tmp[3]) )
+        d['dl_te'].append( np.float(tmp[4]) )
+        d['sigma_dl_te'].append( np.float(tmp[5]) )
+        d['dl_ee'].append( np.float(tmp[6]) )
+        d['sigma_dl_ee'].append( np.float(tmp[7]) )
+        d['dl_bb'].append( np.float(tmp[8]) )
+        d['sigma_dl_bb'].append( np.float(tmp[9]) )
+
+    for k in d.keys():
+        d[k] = np.array(d[k])
+    return d
 
 if (__name__=='__main__'): make_baseline()

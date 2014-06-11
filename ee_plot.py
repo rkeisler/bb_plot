@@ -9,7 +9,7 @@ datadir='./data/'
 def make_baseline():
     '''
     Run the make_one() function with the baseline parameters, and 
-    save the output image as ee.png.
+    save the output image as ee.pdf.
     '''
     make_one(savename='ee.pdf', lpower=2, include_wmap=True, 
              filetype='pdf')
@@ -17,21 +17,23 @@ def make_baseline():
 
 
 def make_many():
-    make_baseline()
-    make_one(lpower=2, include_wmap=True)
-    make_one(lpower=2, include_wmap=False)
+    #make_baseline()
+    make_one(lpower=2, logy=False, logx=False)
+    make_one(lpower=2, logy=False, logx=True)
+    #make_one(lpower=2, include_wmap=True)
+    #make_one(lpower=2, include_wmap=False)
 
 
 
 def make_one(lpower=1.5, include_wmap=True, force_crop=True, 
-             logy=False, filetype='png', 
+             logx=True, logy=False, filetype='pdf', 
              savepath='./', savename=None):
     '''
     The main program for making this figure.
     LPOWER [1.5] controls the power of the multipole scaling.
     INCLUDE_WMAP [True] determines whether to include the WMAP data.
     FORCE_CROP [True] determines whether to use the "BICEP2+QUaD" vertical range.
-    FILETYPE ['png'] is the type of image produced.
+    FILETYPE ['pdf'] is the type of image produced.
     SAVEPATH ['./'] is the save path.
     SAVENAME [None] is available if you want to force a particular filename.
     '''
@@ -43,17 +45,24 @@ def make_one(lpower=1.5, include_wmap=True, force_crop=True,
     wmap = load_data('wmap', lpower)
     bi = load_data('bicep2', lpower)
     quad = load_data('quad', lpower)
-    
+    actpol = load_data('actpol', lpower)
+    sptpol100d = load_data('sptpol100d', lpower)
+
     # Set up a few things for plotting.
     lscal = lscaling(l, lpower)
     fs = 18
-    lw_theory = 2
+    lw_theory = 1
     lw_data = 2
-    fplot = pl.semilogx
-    if logy: fplot = pl.loglog
+    if (logx) & (logy): fplot = pl.loglog
+    if (logx) & (not(logy)): fplot = pl.semilogx
+    if (not(logx)) & (logy): fplot = pl.semilogy
+    if (not(logx)) & (not(logy)): fplot = pl.plot
+    #fplot = pl.semilogx
+    #if logy: fplot = pl.loglog
     pl.clf()
     #pl.xlim(3,6e3)
-    pl.xlim(20,5e3)
+    if logx: pl.xlim(20,5e3)
+    else: pl.xlim(20,3.5e3)
     pl.xlabel(r'$\ell$', fontsize=fs)
     pl.ylabel(get_ylabel(lpower), fontsize=fs)
 
@@ -62,8 +71,8 @@ def make_one(lpower=1.5, include_wmap=True, force_crop=True,
 
 
     # Plot the data.
-    exp2plot = [bi, quad]
-    if include_wmap: exp2plot.append(wmap)
+    exp2plot = [bi, actpol, sptpol100d]
+    if (include_wmap) & (not(wmap in exp2plot)): exp2plot.append(wmap)
     ax = pl.gca()
     ms_scale = 1.
     if not(force_crop): ms_scale *= 0.5
@@ -94,13 +103,16 @@ def make_one(lpower=1.5, include_wmap=True, force_crop=True,
     yl = ax.get_ylim()
     xl = ax.get_xlim()
     fs_legend = 19
-    if logy:
+    if logx:
         xt = 2.*xl[0]
+    else:
+        xt = 0.55*xl[1]
+
+    if logy:
         yt = 0.3*yl[1]
         dyt = 1.8
     else:
-        xt = 2.*xl[0]
-        yt = 0.85*(yl[1]-yl[0]) + yl[0]
+        yt = 0.90*(yl[1]-yl[0]) + yl[0]
         dyt = (yl[1]-yl[0])/14.
     this_yt = yt
     for i,e in enumerate(exp2plot):
@@ -111,10 +123,11 @@ def make_one(lpower=1.5, include_wmap=True, force_crop=True,
 
     # Save the figure.
     if savename==None:
-        savename = savepath+'ee_l%0.1f_bicep2_quad'%lpower
+        savename = savepath+'ee_l%0.1f_bicep2_sptpol_actpol'%lpower
         if include_wmap: savename += '_wmap'
         if not(force_crop): savename += '_nocrop'
         if logy: savename += '_logy'
+        if logx: savename += '_logx'
         savename += '.'+filetype
     print 'making '+savename
     pl.savefig(savename, dpi=300)
@@ -156,7 +169,7 @@ def load_data(exp, lpower):
         sigma_cl_ee = sigma_dl_ee/l/(l+1.)*2.*np.pi
         legend_name = 'WMAP'
         name = 'wmap'
-        color = 'Navy'
+        color = 'orange'
         symbol = 'o'
         capsize=0
         
@@ -186,12 +199,67 @@ def load_data(exp, lpower):
         symbol = 'o'
         capsize=3
 
+    if exp=='actpol':
+        actpol = load_actpol()
+        l = actpol['l']
+        dl_ee = actpol['dl_ee']
+        sigma_dl_ee = actpol['sigma_dl_ee']
+        cl_ee = dl_ee/l/(l+1.)*2.*np.pi
+        sigma_cl_ee = sigma_dl_ee/l/(l+1.)*2.*np.pi
+        legend_name = 'ACTpol'
+        name = 'actpol'
+        color = 'darkgreen'
+        symbol = 'o'
+        capsize=3
+
+
+    if exp=='sptpol100d':
+        import pickle
+        d = pickle.load(open('data/sptpol_bandpowers_plotting_deepfield_dell50.pkl','r'))
+        l = d['bandcenters']['EE']
+        dl_ee = d['bandpowers']['EE']
+        sigma_dl_ee = d['banderrors']['EE']
+        cl_ee = dl_ee/l/(l+1.)*2.*np.pi
+        sigma_cl_ee = sigma_dl_ee/l/(l+1.)*2.*np.pi
+
+        legend_name = 'SPTpol-100d (prelim.)'
+        name = 'sptpol100d'
+        color = 'navy'
+        symbol = 'o'
+        capsize=3
+
+
+
     return {'l':l, 'cl':cl_ee, 'dcl':sigma_cl_ee, 
             'name':name, 'legend_name':legend_name, 
             'color':color, 
             'plot':cl_ee*lscaling(l, lpower),
             'dplot':sigma_cl_ee*lscaling(l, lpower), 
             'symbol':symbol, 'capsize':capsize}
+
+
+def load_actpol():
+    f = open('data/actpol_1405_5524_data.txt','r')
+    d = {'l':[], 'dl_tt':[], 'sigma_dl_tt':[], 
+         'dl_te':[], 'sigma_dl_te':[], 
+         'dl_ee':[], 'sigma_dl_ee':[], 
+         'dl_bb':[], 'sigma_dl_bb':[]}
+    for line in f:
+        tmp = line.split('&')
+        d['l'].append( np.float(tmp[0]) )
+        d['dl_tt'].append( np.float(tmp[2]) )
+        d['sigma_dl_tt'].append( np.float(tmp[3]) )
+        d['dl_te'].append( np.float(tmp[4]) )
+        d['sigma_dl_te'].append( np.float(tmp[5]) )
+        d['dl_ee'].append( np.float(tmp[6]) )
+        d['sigma_dl_ee'].append( np.float(tmp[7]) )
+        d['dl_bb'].append( np.float(tmp[8]) )
+        d['sigma_dl_bb'].append( np.float(tmp[9]) )
+
+    for k in d.keys():
+        d[k] = np.array(d[k])
+    return d
+
 
 def lscaling(l, lpower=1.):
     if (lpower==0) | (lpower==0.5) | (lpower==1): output = l**(lpower)
