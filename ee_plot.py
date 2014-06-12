@@ -52,7 +52,7 @@ def make_one(lpower=1.5,
     pl.clf()
     #pl.xlim(3,6e3)
     if logx: pl.xlim(20,5e3)
-    else: pl.xlim(20,3.5e3)
+    else: pl.xlim(0,3.5e3)
     pl.xlabel(r'$\ell$', fontsize=fs)
     pl.ylabel(get_ylabel(lpower), fontsize=fs)
 
@@ -217,8 +217,10 @@ def load_data(exp, lpower):
         import pickle
         d = pickle.load(open('data/sptpol_bandpowers_plotting_deepfield_dell50.pkl','r'))
         l = d['bandcenters']['EE']
-        dl_ee = d['bandpowers']['EE']
-        sigma_dl_ee = d['banderrors']['EE']
+        wh=np.where(l>=200)[0]
+        l = l[wh]
+        dl_ee = d['bandpowers']['EE'][wh]
+        sigma_dl_ee = d['banderrors']['EE'][wh]
         cl_ee = dl_ee/l/(l+1.)*2.*np.pi
         sigma_cl_ee = sigma_dl_ee/l/(l+1.)*2.*np.pi
 
@@ -234,8 +236,10 @@ def load_data(exp, lpower):
         import pickle
         d = pickle.load(open('data/sptpol_data_2013_plotting.pkl','r'))
         l = d['ells']
-        dl_ee = d['EE']
-        sigma_dl_ee = d['EE_errors']
+        wh=np.where(l>=200)[0]
+        l = l[wh]
+        dl_ee = d['EE'][wh]
+        sigma_dl_ee = d['EE_errors'][wh]
         cl_ee = dl_ee/l/(l+1.)*2.*np.pi
         sigma_cl_ee = sigma_dl_ee/l/(l+1.)*2.*np.pi
 
