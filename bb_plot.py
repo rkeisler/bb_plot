@@ -6,31 +6,12 @@ pl.ion()
 datadir='./data/'
 
 
-def make_baseline():
-    '''
-    Run the make_one() function with the baseline parameters, and 
-    save the output image as bb.png.
-    '''
-    make_one(savename='bb.pdf', force_crop=True, lpower=2, 
-             logy=False, filetype='pdf')
-
-
-
 def make_many():
-    make_one(force_crop=True, logy=False, include_actpol=False, include_polarbear=True)
-    make_one(force_crop=True, logy=False, include_actpol=False, include_polarbear=False)
-    make_one(force_crop=False, logy=False, include_actpol=False, include_polarbear=True)
-    make_one(force_crop=False, logy=False, include_actpol=True, include_polarbear=True)
+    make_one(force_crop=True, include_actpol=False, include_polarbear=True)
+    make_one(force_crop=True, include_actpol=False, include_polarbear=False)
+    make_one(force_crop=False, include_actpol=False, include_polarbear=True)
+    make_one(force_crop=False, include_actpol=True, include_polarbear=True)
 
-
-    '''
-    make_baseline()
-    make_one(force_crop=True,lpower=1.5)
-    make_one(force_crop=False,lpower=1.5)
-    make_one(force_crop=True,lpower=2)
-    make_one(force_crop=False,lpower=2)
-    make_one(force_crop=False,lpower=2,logy=True)
-    '''
 
 
 def make_one(lpower=2, include_polarbear=True, 

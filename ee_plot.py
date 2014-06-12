@@ -4,29 +4,13 @@ from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica'], 'size':13})
 pl.ion()
 datadir='./data/'
-
-
-def make_baseline():
-    '''
-    Run the make_one() function with the baseline parameters, and 
-    save the output image as ee.pdf.
-    '''
-    make_one(savename='ee.pdf', lpower=2, include_wmap=True, 
-             filetype='pdf')
-
-
+color2=False
 
 def make_many():
-    #make_baseline()
-    #make_one(lpower=2, include_wmap=True)
-    #make_one(lpower=2, include_wmap=False)
-
     make_one(lpower=2, logy=False, logx=False, include_sptpol500d=False)
     make_one(lpower=2, logy=False, logx=True, include_sptpol500d=False)
     make_one(lpower=2, logy=False, logx=False, include_sptpol500d=True)
     make_one(lpower=2, logy=False, logx=True, include_sptpol500d=True)
-
-
 
 def make_one(lpower=1.5, 
              include_sptpol500d=False, 
@@ -132,13 +116,15 @@ def make_one(lpower=1.5,
 
     # Save the figure.
     if savename==None:
-        savename = savepath+'ee_l%0.1f_bicep2_actpol'%lpower
+        savename = savepath+'ee_l%0.1f'%lpower
+        if logy: savename += '_logy'
+        if logx: savename += '_logx'
+        savename += '_bicep2_actpol'
         if include_sptpol500d: savename += '_sptpol500d'
         else: savename += '_sptpol100d'
         if include_wmap: savename += '_wmap'
         if not(force_crop): savename += '_nocrop'
-        if logy: savename += '_logy'
-        if logx: savename += '_logx'
+        if color2: savename += '_color2'
         savename += '.'+filetype
     print 'making '+savename
     pl.savefig(savename, dpi=300)
@@ -180,7 +166,9 @@ def load_data(exp, lpower):
         sigma_cl_ee = sigma_dl_ee/l/(l+1.)*2.*np.pi
         legend_name = 'WMAP'
         name = 'wmap'
-        color = 'orange'
+        color = 'darkgreen'
+        if color2: color='orange'
+        #color = 'orange'
         symbol = 'o'
         capsize=0
         
@@ -219,7 +207,8 @@ def load_data(exp, lpower):
         sigma_cl_ee = sigma_dl_ee/l/(l+1.)*2.*np.pi
         legend_name = 'ACTpol'
         name = 'actpol'
-        color = 'darkgreen'
+        color = 'orange'
+        if color2: color = 'cadetblue'
         symbol = 'o'
         capsize=3
 
@@ -235,7 +224,8 @@ def load_data(exp, lpower):
 
         legend_name = 'SPTpol-100d (prelim.)'
         name = 'sptpol100d'
-        color = 'navy'
+        color = 'blue'
+        if color2: color = 'red'
         symbol = 'o'
         capsize=3
 
@@ -252,6 +242,7 @@ def load_data(exp, lpower):
         legend_name = 'SPTpol-500d (prelim.)'
         name = 'sptpol500d'
         color = 'blue'
+        if color2: color = 'red'
         symbol = 'o'
         capsize=3
 
