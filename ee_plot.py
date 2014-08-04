@@ -224,7 +224,7 @@ def load_data(exp, lpower):
         cl_ee = dl_ee/l/(l+1.)*2.*np.pi
         sigma_cl_ee = sigma_dl_ee/l/(l+1.)*2.*np.pi
 
-        legend_name = 'SPTpol-100d (prelim.)'
+        legend_name = 'SPTpol'#-100d (prelim.)'
         name = 'sptpol100d'
         color = 'blue'
         if color2: color = 'red'
